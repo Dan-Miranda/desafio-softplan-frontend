@@ -1,0 +1,20 @@
+.HomeContainer {
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  background: #2E2E80;
+}
+
+.HomeTitulo.HomeTitulo {
+  color: #FFFFFF;
+}
+
+.HomeBotaoAddPessoa.HomeBotaoAddPessoa {
+  background: #288049;
+  padding: 16px;
+  color: #FFFFFF;
+  &:hover {
+    background: #288049;
+    opacity: 0.9;
+  }
+}
