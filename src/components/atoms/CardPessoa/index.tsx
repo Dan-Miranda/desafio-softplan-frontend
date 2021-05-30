@@ -1,9 +1,8 @@
 import {
   Button,
-  Card, CircularProgress, Grid, IconButton, Typography,
+  Card, Grid, IconButton, Typography,
 } from '@material-ui/core';
 import { Delete, Edit } from '@material-ui/icons';
-import { useRouter } from 'next/dist/client/router';
 import React, { useState } from 'react';
 import PessoaService from '../../../service/PessoaService';
 import EditarPessoaInterface from '../../../service/PessoaService/interfaces/EditarPessoaInterface';
@@ -35,6 +34,7 @@ const CardPessoa: React.FC<Props> = (props) => {
   const [nome, setNome] = useState(pessoa.nome);
   const [sexo, setSexo] = useState(pessoa.sexo);
   const [isLoading, setIsLoading] = useState(false);
+  const [emailErro, setEmailErro] = useState(false);
 
   const editar = () => {
     setIsLoading(true);
@@ -65,22 +65,29 @@ const CardPessoa: React.FC<Props> = (props) => {
 
   const excluir = () => {
     setIsLoading(true);
-    PessoaService.deletarPessoaProxy(pessoa.cpf)
-      .then((resposta) => {
-        if (resposta.data) {
-          setDialogAviso({
-            isAberto: true,
-            mensagem: 'Pessoa excluída com sucesso!',
-          });
-        }
-      })
-      .catch(() => setDialogAviso({
+    if (!emailErro) {
+      PessoaService.deletarPessoaProxy(pessoa.cpf)
+        .then((resposta) => {
+          if (resposta.data) {
+            setDialogAviso({
+              isAberto: true,
+              mensagem: 'Pessoa excluída com sucesso!',
+            });
+          }
+        })
+        .catch(() => setDialogAviso({
+          isAberto: true,
+          mensagem: 'Erro ao efetuar Cadastro!',
+        }))
+        .finally(() => {
+          setIsLoading(false);
+        });
+    } else {
+      setDialogAviso({
         isAberto: true,
-        mensagem: 'Erro ao efetuar Cadastro!',
-      }))
-      .finally(() => {
-        setIsLoading(false);
+        mensagem: 'Impossível salvar! Há campos inválidos',
       });
+    }
   };
 
   return (
@@ -125,12 +132,13 @@ const CardPessoa: React.FC<Props> = (props) => {
             nomeState={[nome, setNome]}
             sexoState={[sexo, setSexo]}
             emailState={[email, setEmail]}
+            emailErroState={[emailErro, setEmailErro]}
             nacionalidadeState={[nacionalidade, setNacionalidade]}
           />
         )}
         acoes={(
           <Button
-            className={styles.HomeBotaoAddPessoa}
+            className={styles.HomeBotaoEditarPessoa}
             onClick={() => editar()}
           >
             Editar

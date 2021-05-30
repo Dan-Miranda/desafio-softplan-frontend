@@ -1,8 +1,18 @@
+.HomeBackground {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #2E2E80;
+  width: 100%;
+  height: 100%;
+}
+
 .HomeContainer {
+  max-width: 768px;
   width: 100%;
   height: 100%;
   padding: 20px;
-  background: #2E2E80;
 }
 
 .HomeTitulo.HomeTitulo {
@@ -13,6 +23,7 @@
   background: #288049;
   padding: 16px;
   color: #FFFFFF;
+
   &:hover {
     background: #288049;
     opacity: 0.9;

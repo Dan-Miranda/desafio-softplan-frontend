@@ -1,5 +1,5 @@
 import {
-  Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Grid, Typography,
+  Button, CircularProgress, Grid, Typography,
 } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
 import PessoaService from '../../../service/PessoaService';
@@ -8,7 +8,9 @@ import { converterData } from '../../../utils/converterData';
 import DialogAviso from '../../molecules/DialogAviso';
 import DialogPessoa from '../../molecules/DialogPessoa';
 import FormularioPessoa from '../../molecules/FormularioPessoa';
+import Header from '../../molecules/Header';
 import ListaPessoas from '../../molecules/ListaPessoas';
+import Titulo from '../../molecules/Titulo';
 
 import styles from './Home.module.scss';
 
@@ -22,8 +24,11 @@ const Home: React.FC = () => {
     mensagem: '',
   });
   const [cpf, setCpf] = useState('');
+  const [cpfErro, setCpfErro] = useState(false);
   const [dataNascimento, setDataNascimento] = useState('');
+  const [dataNascimentoErro, setDataNascimentoErro] = useState(false);
   const [email, setEmail] = useState('');
+  const [emailErro, setEmailErro] = useState(false);
   const [nacionalidade, setNacionalidade] = useState('');
   const [naturalidade, setNaturalidade] = useState('');
   const [nome, setNome] = useState('');
@@ -46,36 +51,43 @@ const Home: React.FC = () => {
 
   const cadastrar = () => {
     setIsLoading(true);
-    const pessoa: PessoaInterface = {
-      cpf,
-      nome,
-      sexo,
-      email,
-      dataNascimento: converterData(dataNascimento),
-      nacionalidade,
-      naturalidade,
-      dataAtualizacao: new Date(),
-      dataCadastro: new Date(),
-    };
-    PessoaService.cadastrarPessoaProxy(pessoa)
-      .then((resposta) => {
-        if (resposta) {
+
+    if (!cpfErro && !dataNascimentoErro && !emailErro) {
+      const pessoa: PessoaInterface = {
+        cpf,
+        nome,
+        sexo,
+        email,
+        dataNascimento: converterData(dataNascimento),
+        nacionalidade,
+        naturalidade,
+        dataAtualizacao: new Date(),
+        dataCadastro: new Date(),
+      };
+      PessoaService.cadastrarPessoaProxy(pessoa)
+        .then((resposta) => {
+          if (resposta) {
+            setDialogAviso({
+              isAberto: true,
+              mensagem: 'Cadastro efetuado com sucesso !',
+            });
+          }
+        })
+        .catch(() => {
           setDialogAviso({
             isAberto: true,
-            mensagem: 'Cadastro efetuado com sucesso !',
+            mensagem: 'Erro ao efetuar Cadastro!',
           });
-        }
-      })
-      .catch(() => {
-        setDialogAviso({
-          isAberto: true,
-          mensagem: 'Erro ao efetuar Cadastro!',
+        })
+        .finally(async () => {
+          setDialogAddPessoa(false);
         });
-      })
-      .finally(async () => {
-        setDialogAddPessoa(false);
-        await carregarPessoas();
+    } else {
+      setDialogAviso({
+        isAberto: true,
+        mensagem: 'Impossível salvar! Há campos inválidos',
       });
+    }
   };
 
   const renderCorpo = () => {
@@ -95,9 +107,8 @@ const Home: React.FC = () => {
 
     return (
       <>
-        <Typography variant="h5" className={styles.HomeTitulo}>
-          Pessoas
-        </Typography>
+        <Titulo />
+
         <ListaPessoas pessoas={pessoas} />
         <Button onClick={() => setDialogAddPessoa(true)} className={styles.HomeBotaoAddPessoa}>
           Cadastrar
@@ -107,47 +118,53 @@ const Home: React.FC = () => {
   };
 
   return (
-    <Grid
-      container
-      direction="column"
-      alignItems="center"
-      className={styles.HomeContainer}
-      justify="space-between"
-    >
-      { renderCorpo() }
-      <DialogPessoa
-        abrir={dialogAddPessoa}
-        fechar={setDialogAddPessoa}
-        titulo="Cadastrar Pessoa"
-        corpo={isLoading
-          ? (
-            <Grid container alignItems="center" justify="center">
-              <CircularProgress />
-            </Grid>
-          ) : (
-            <FormularioPessoa
-              nomeState={[nome, setNome]}
-              sexoState={[sexo, setSexo]}
-              cpfState={[cpf, setCpf]}
-              dataNascimentoState={[dataNascimento, setDataNascimento]}
-              emailState={[email, setEmail]}
-              nacionalidadeState={[nacionalidade, setNacionalidade]}
-              naturalidadeState={[naturalidade, setNaturalidade]}
-            />
+    <div className={styles.HomeBackground}>
+      <Header />
+      <Grid
+        container
+        direction="column"
+        alignItems="center"
+        justify="space-between"
+        className={styles.HomeContainer}
+      >
+        { renderCorpo() }
+        <DialogPessoa
+          abrir={dialogAddPessoa}
+          fechar={setDialogAddPessoa}
+          titulo="Cadastrar Pessoa"
+          corpo={isLoading
+            ? (
+              <Grid container alignItems="center" justify="center">
+                <CircularProgress />
+              </Grid>
+            ) : (
+              <FormularioPessoa
+                nomeState={[nome, setNome]}
+                sexoState={[sexo, setSexo]}
+                cpfState={[cpf, setCpf]}
+                cpfErroState={[cpfErro, setCpfErro]}
+                dataNascimentoState={[dataNascimento, setDataNascimento]}
+                dataNascimentoErroState={[dataNascimentoErro, setDataNascimentoErro]}
+                emailState={[email, setEmail]}
+                emailErroState={[emailErro, setEmailErro]}
+                nacionalidadeState={[nacionalidade, setNacionalidade]}
+                naturalidadeState={[naturalidade, setNaturalidade]}
+              />
+            )}
+          acoes={(
+            <Button
+              className={styles.HomeBotaoAddPessoa}
+              onClick={() => cadastrar()}
+            >
+              Cadastrar
+            </Button>
           )}
-        acoes={(
-          <Button
-            className={styles.HomeBotaoAddPessoa}
-            onClick={() => cadastrar()}
-          >
-            Cadastrar
-          </Button>
-        )}
-        telaCheia
-      />
+          telaCheia
+        />
 
-      <DialogAviso dialogAvisoState={[dialogAviso, setDialogAviso]} />
-    </Grid>
+        <DialogAviso dialogAvisoState={[dialogAviso, setDialogAviso]} />
+      </Grid>
+    </div>
   );
 };
 

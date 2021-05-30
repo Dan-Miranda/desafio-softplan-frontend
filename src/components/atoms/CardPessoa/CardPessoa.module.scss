@@ -13,3 +13,14 @@
   color: #545480;
   font-size: small;
 }
+
+.HomeBotaoEditarPessoa.HomeBotaoEditarPessoa {
+  background: #288049;
+  padding: 16px;
+  color: #FFFFFF;
+
+  &:hover {
+    background: #288049;
+    opacity: 0.9;
+  }
+}
